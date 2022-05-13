@@ -1,0 +1,7 @@
+﻿  gba_key_def.cpp
+D:\Hobby\ProjectGames\ZelfGemaakt\20212022\Dev\GBADev\Projects\BounceGame\source\gba_obj_def.h(16,3): error C3861: 'aligned': identifier not found
+D:\Hobby\ProjectGames\ZelfGemaakt\20212022\Dev\GBADev\Projects\BounceGame\source\gba_obj_def.h(16,3): error C2513: 'OBJ_ATTR': no variable declared before '='
+D:\Hobby\ProjectGames\ZelfGemaakt\20212022\Dev\GBADev\Projects\BounceGame\source\gba_obj_def.h(16,3): fatal error C1903: unable to recover from previous error(s); stopping compilation
+  INTERNAL COMPILER ERROR in 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\bin\HostX86\x86\CL.exe'
+      Please choose the Technical Support command on the Visual C++
+      Help menu, or open the Technical Support help file for more information

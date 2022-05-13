@@ -2,9 +2,10 @@
 #define GBA_TOOL_DEF_H
 
 // Windows files
-#include <string.h>
+#include <cstring>
 #include <array>
 #include <typeinfo>
+#include <iostream>
 
 // Own header files
 #include "gba_base_def.h"
@@ -17,6 +18,8 @@
 #include "gba_input_def.h"
 #include "gba_bg_attributes.h"
 #include "gba_rng_def.h"
+
+#include "log.h"
 
 // Sprites
 #include "sprites/BouncySheep_4bpp.c"
