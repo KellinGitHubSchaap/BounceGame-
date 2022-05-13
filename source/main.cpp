@@ -53,7 +53,6 @@ public:
 
 #pragma endregion
 
-
 #pragma region SetSprites(), SetBackground(), and ResetOAM() functions
 
 // Set up all settings of the sprites in memory 
@@ -83,16 +82,14 @@ void ResetOAM()
 
 #pragma endregion
 
-
 #pragma region CreatePlatform function
-
-// Platform CreatePlatform() is called at the start of the game, its job is to place an X amount platforms across the screen 
 
 std::array<Platform, 12> platformArray;		//!< The PlatformArray is used to store objects with the type class PLATFORM
 u8 platformArraySpot = 0;					//!< Since I want to use a 2D array, I need to store at what position I am at within the PlatformArray
 
 char posXDebug[100];
 
+// Platform CreatePlatform() is called at the start of the game, its job is to place an X amount platforms across the screen 
 Platform CreatePlatform(u8 offsetY = 0)
 {
 	Platform* plat = new Platform();
@@ -100,12 +97,12 @@ Platform CreatePlatform(u8 offsetY = 0)
 
 	do
 	{
-		u8 randomPosX = qran_range(0, SCREEN_WIDTH - plat->spawnWidth);
+		u8 randomPosX = qran_range(0, SCREEN_WIDTH - plat->width);
 		collision = false;
 
 		for (u8 i = 0; i < platformArray.size(); i++)
 		{
-			if (((randomPosX + plat->spawnWidth) < platformArray[i].posX) || (randomPosX > (platformArray[i].posX + platformArray[i].width)))
+			if (((randomPosX + plat->width) < platformArray[i].posX) || (randomPosX > (platformArray[i].posX + platformArray[i].width)))
 			{
 				plat->posX = randomPosX;
 				plat->posY = offsetY;
@@ -130,26 +127,23 @@ Platform CreatePlatform(u8 offsetY = 0)
 
 #pragma endregion
 
-
 #pragma region MoveBackground and MovePlatforms functions
-
-
-// MoveBackground will move the background at the same time that the sheep is in a state of bouncing 
 
 u16 currentBGOffsetY = 0;	//!< Current offset of the background
 
+// MoveBackground will move the background at the same time that the sheep is in a state of bouncing 
 void MoveBackground()
 {
 	currentBGOffsetY -= 1;
 	BG0_VER_OFFSET = currentBGOffsetY;
 }
 
-// MovePlatforms is used to move all the platforms on screen when the sheep is in a bounce state and the (bool isBouncing = true)
-
 Platform* currentHitPlatform;	//!< Current collision with a platform
 Platform* lastHitPlatform;		//!< Last known collision based on platform type
 bool moveTheWorld = false;
 
+// MovePlatforms() function is used to move all the platforms on screen when the sheep is in a bounce state and the (bool isBouncing = true)
+// It also gives the platforms a new X position everytime they wrap around the screen.
 void MovePlatforms()
 {
 	for (u32 p = 0; p < platformArray.size(); p++)
@@ -166,7 +160,6 @@ void MovePlatforms()
 }
 
 #pragma endregion
-
 
 char curPlatBuffer[100];
 char lasPlatBuffer[100];
