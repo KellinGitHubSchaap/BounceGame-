@@ -7,19 +7,19 @@ u32 oam_index = 0;										//!< Used to get/set OAM Size
 #pragma region Classes
 
 bool isBouncing = false;	//!< Is the sheep currently in bounce mode
-u8 bounceStrength = 48;		//!< bounceStrength is going to be added to the current Y position of the Sheep
-u8 bounceHeight;			//!< bounceHeight is a combo of the current sheep position and the strength of the jump 
+u32 bounceStrength = 48;		//!< bounceStrength is going to be added to the current Y position of the Sheep
+u32 bounceHeight;			//!< bounceHeight is a combo of the current sheep position and the strength of the jump 
 
 class Sheep
 {
 public:
-	u8 posX = 120, posY = 96;
+	u32 posX = 120, posY = 96;
 	u32 tile = 0, paletteBank = 0;
 	OBJ_ATTR* bouncySheepAttr = &obj_buffer[0];
 
-	u8 width = 16, height = 16;
-	u8 fallSpeed = 2;
-	u8 horizontalSpeed = 1;
+	u32 width = 16, height = 16;
+	u32 fallSpeed = 2;
+	u32 horizontalSpeed = 1;
 
 	void Render()
 	{
@@ -32,15 +32,14 @@ public:
 class Platform
 {
 public:
-	u8 posX = 0, posY = 144;
+	u32 posX = 0, posY = 144;
 	u32 tile = 4, paletteBank = 1;
 	OBJ_ATTR* platformAttr = &obj_buffer[1];
 
-	u8 width = 16, height = 6;
-	u8 spawnWidth = 24;
-	u8 platformOffsetY = 32;
+	u32 width = 16, height = 6;
+	u32 platformOffsetY = 32;
 
-	u8 platformID;
+	u32 platformID;
 
 	void Render()
 	{
@@ -85,7 +84,7 @@ void ResetOAM()
 #pragma region CreatePlatform function
 
 std::array<Platform, 12> platformArray;		//!< The PlatformArray is used to store objects with the type class PLATFORM
-u8 platformArraySpot = 0;					//!< Since I want to use a 2D array, I need to store at what position I am at within the PlatformArray
+u32 platformArraySpot = 0;					//!< Since I want to use a 2D array, I need to store at what position I am at within the PlatformArray
 
 char posXDebug[300];
 
@@ -95,7 +94,7 @@ void CreatePlatform(u32 offsetY)
 	const u32 width = platformArray[platformArraySpot].width;
 
 	bool collision;
-	u32 randomPosX;
+	s32 randomPosX;
 
 	do
 	{
@@ -133,7 +132,7 @@ void CreatePlatform(u32 offsetY)
 
 #pragma region MoveBackground and MovePlatforms functions
 
-u16 currentBGOffsetY = 0;	//!< Current offset of the background
+u32 currentBGOffsetY = 0;	//!< Current offset of the background
 
 // MoveBackground will move the background at the same time that the sheep is in a state of bouncing 
 void MoveBackground()
@@ -185,9 +184,9 @@ int main()
 	}
 
 	// Spawn the amount that the platformArray is able to store (standard is 12 in a 3x4 set up)
-	for (u8 y = 0; y < 4; y++)
+	for (u32 y = 0; y < 4; y++)
 	{
-		for (u8 x = 0; x < 3; x++)
+		for (u32 x = 0; x < 3; x++)
 		{
 			CreatePlatform(y * 32);
 			platformArraySpot++;
