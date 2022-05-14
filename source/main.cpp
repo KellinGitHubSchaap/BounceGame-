@@ -90,12 +90,13 @@ u8 platformArraySpot = 0;					//!< Since I want to use a 2D array, I need to sto
 char posXDebug[300];
 
 // Platform CreatePlatform() is called at the start of the game, its job is to place an X amount platforms across the screen 
-Platform CreatePlatform(u32 randomPosX, u32 offsetY)
+Platform CreatePlatform(u32 offsetY)
 {
 	bool collision = false;
 
 	do
 	{
+		u32 randomPosX = qran_range(0, SCREEN_WIDTH - platformArray[platformArraySpot].width);
 		collision = false;
 
 		for (u32 i = 0; i < platformArray.size(); i++)
@@ -106,6 +107,7 @@ Platform CreatePlatform(u32 randomPosX, u32 offsetY)
 				platformArray[platformArraySpot].posY = offsetY;
 
 				return platformArray[platformArraySpot];
+				
 				continue;
 			}
 			else
@@ -117,33 +119,6 @@ Platform CreatePlatform(u32 randomPosX, u32 offsetY)
 	} while (collision);
 }
 
-
-
-/*do
-{
-	u8 randomPosX = qran_range(0, SCREEN_WIDTH - plat->width);
-	collision = false;
-
-	for (u8 i = 0; i < platformArray.size(); i++)
-	{
-		if (((randomPosX + plat->width) < platformArray[i].posX) || (randomPosX > (platformArray[i].posX + platformArray[i].width)))
-		{
-			plat->posX = randomPosX;
-			plat->posY = offsetY;
-
-			return *plat;
-			continue;
-		}
-		else
-		{
-			collision = true;
-			int attempts = 0;
-			attempts++;
-			snprintf(posXDebug, sizeof(posXDebug), "attempts = %i", attempts);
-			break;
-		}
-	}
-} while (collision);*/
 
 
 //TODO: Fix the spawning of the platforms | Overlap is still present
@@ -208,7 +183,7 @@ int main()
 	{
 		for (u8 x = 0; x < 3; x++)
 		{
-			platformArray[platformArraySpot] = CreatePlatform(qran_range(0, SCREEN_WIDTH - platformArray[platformArraySpot].width), y * 32);
+			platformArray[platformArraySpot] = CreatePlatform(y * 32);
 			platformArraySpot++;
 		}
 	}
