@@ -90,33 +90,39 @@ u8 platformArraySpot = 0;					//!< Since I want to use a 2D array, I need to sto
 char posXDebug[300];
 
 // Platform CreatePlatform() is called at the start of the game, its job is to place an X amount platforms across the screen 
-Platform CreatePlatform(u32 offsetY)
+void CreatePlatform(u32 offsetY)
 {
-	bool collision = false;
+	const u32 width = platformArray[platformArraySpot].width;
+
+	bool collision;
+	u32 randomPosX;
 
 	do
 	{
-		u32 randomPosX = qran_range(0, SCREEN_WIDTH - platformArray[platformArraySpot].width);
+		randomPosX = qran_range(0, SCREEN_WIDTH - width);
 		collision = false;
 
-		for (u32 i = 0; i < platformArray.size(); i++)
+		for (u32 i = 0; i < platformArraySpot; i++)
 		{
-			if (((randomPosX + platformArray[platformArraySpot].width) < platformArray[i].posX) || (randomPosX > (platformArray[i].posX + platformArray[i].width)))
-			{
-				platformArray[platformArraySpot].posX = randomPosX;
-				platformArray[platformArraySpot].posY = offsetY;
-
-				return platformArray[platformArraySpot];
-				
-				continue;
-			}
-			else
+			snprintf(posXDebug, sizeof(posXDebug), " Platform Spot : %i , Current platform = %i ",platformArraySpot,  platformArray[i]);
+			if (!((randomPosX + width) < platformArray[i].posX) || ((randomPosX - width) > platformArray[i].posX))
 			{
 				collision = true;
 				break;
 			}
 		}
+
+
+		if (logInitNocash)
+		{
+			logOutputNocash(0, posXDebug);
+		}
+
+
 	} while (collision);
+
+	platformArray[platformArraySpot].posX = randomPosX;
+	platformArray[platformArraySpot].posY = offsetY;
 }
 
 
@@ -183,7 +189,7 @@ int main()
 	{
 		for (u8 x = 0; x < 3; x++)
 		{
-			platformArray[platformArraySpot] = CreatePlatform(y * 32);
+			CreatePlatform(y * 32);
 			platformArraySpot++;
 		}
 	}
