@@ -13,7 +13,7 @@ u32 bounceHeight;			//!< bounceHeight is a combo of the current sheep position a
 class Sheep
 {
 public:
-	u32 posX = 120, posY = 96;
+	s32 posX = 120, posY = 96;
 	u32 tile = 0, paletteBank = 0;
 	OBJ_ATTR* bouncySheepAttr = &obj_buffer[0];
 
@@ -32,7 +32,7 @@ public:
 class Platform
 {
 public:
-	u32 posX = 0, posY = 144;
+	s32 posX = 0, posY = 144;
 	u32 tile = 4, paletteBank = 1;
 	OBJ_ATTR* platformAttr = &obj_buffer[1];
 
@@ -83,15 +83,15 @@ void ResetOAM()
 
 #pragma region CreatePlatform function
 
-std::array<Platform, 12> platformArray;		//!< The PlatformArray is used to store objects with the type class PLATFORM
+std::array<Platform, 15> platformArray;		//!< The PlatformArray is used to store objects with the type class PLATFORM
 u32 platformArraySpot = 0;					//!< Since I want to use a 2D array, I need to store at what position I am at within the PlatformArray
 
 char posXDebug[300];
 
 // Platform CreatePlatform() is called at the start of the game, its job is to place an X amount platforms across the screen 
-void CreatePlatform(u32 offsetY)
+void CreatePlatform(s32 offsetY)
 {
-	const u32 width = platformArray[platformArraySpot].width;
+	const s32 width = platformArray[platformArraySpot].width;
 
 	bool collision;
 	s32 randomPosX;
@@ -104,7 +104,7 @@ void CreatePlatform(u32 offsetY)
 		for (u32 i = 0; i < platformArraySpot; i++)
 		{
 			snprintf(posXDebug, sizeof(posXDebug), " Platform Spot : %i , Current platform = %i ",platformArraySpot,  platformArray[i]);
-			if (!((randomPosX + width) < platformArray[i].posX) || ((randomPosX - width) > platformArray[i].posX))
+			if (platformArray[i].posY == offsetY && !(((randomPosX + width) < platformArray[i].posX) || ((randomPosX - width) > platformArray[i].posX)))
 			{
 				collision = true;
 				break;
@@ -184,7 +184,7 @@ int main()
 	}
 
 	// Spawn the amount that the platformArray is able to store (standard is 12 in a 3x4 set up)
-	for (u32 y = 0; y < 4; y++)
+	for (u32 y = 0; y < 5; y++)
 	{
 		for (u32 x = 0; x < 3; x++)
 		{
