@@ -87,42 +87,65 @@ void ResetOAM()
 std::array<Platform, 12> platformArray;		//!< The PlatformArray is used to store objects with the type class PLATFORM
 u8 platformArraySpot = 0;					//!< Since I want to use a 2D array, I need to store at what position I am at within the PlatformArray
 
-char posXDebug[100];
+char posXDebug[300];
 
 // Platform CreatePlatform() is called at the start of the game, its job is to place an X amount platforms across the screen 
-Platform CreatePlatform(u8 offsetY = 0)
+Platform CreatePlatform(u32 randomPosX, u32 offsetY)
 {
-	Platform* plat = new Platform();
-	bool collision;
+	bool collision = false;
 
 	do
 	{
-		u8 randomPosX = qran_range(0, SCREEN_WIDTH - plat->width);
 		collision = false;
 
-		for (u8 i = 0; i < platformArray.size(); i++)
+		for (u32 i = 0; i < platformArray.size(); i++)
 		{
-			if (((randomPosX + plat->width) < platformArray[i].posX) || (randomPosX > (platformArray[i].posX + platformArray[i].width)))
+			if (((randomPosX + platformArray[platformArraySpot].width) < platformArray[i].posX) || (randomPosX > (platformArray[i].posX + platformArray[i].width)))
 			{
-				plat->posX = randomPosX;
-				plat->posY = offsetY;
+				platformArray[platformArraySpot].posX = randomPosX;
+				platformArray[platformArraySpot].posY = offsetY;
 
-				return *plat;
+				return platformArray[platformArraySpot];
 				continue;
 			}
 			else
 			{
 				collision = true;
-				int attempts = 0;
-				attempts++;
-				snprintf(posXDebug, sizeof(posXDebug), "attempts = %i", attempts);
 				break;
 			}
 		}
 	} while (collision);
-
-	
 }
+
+
+
+/*do
+{
+	u8 randomPosX = qran_range(0, SCREEN_WIDTH - plat->width);
+	collision = false;
+
+	for (u8 i = 0; i < platformArray.size(); i++)
+	{
+		if (((randomPosX + plat->width) < platformArray[i].posX) || (randomPosX > (platformArray[i].posX + platformArray[i].width)))
+		{
+			plat->posX = randomPosX;
+			plat->posY = offsetY;
+
+			return *plat;
+			continue;
+		}
+		else
+		{
+			collision = true;
+			int attempts = 0;
+			attempts++;
+			snprintf(posXDebug, sizeof(posXDebug), "attempts = %i", attempts);
+			break;
+		}
+	}
+} while (collision);*/
+
+
 //TODO: Fix the spawning of the platforms | Overlap is still present
 
 #pragma endregion
@@ -175,12 +198,17 @@ int main()
 
 	Sheep sheep;
 
+	for (u32 i = 0; i < platformArray.size(); i++)
+	{
+		platformArray[i] = Platform();
+	}
+
 	// Spawn the amount that the platformArray is able to store (standard is 12 in a 3x4 set up)
 	for (u8 y = 0; y < 4; y++)
 	{
 		for (u8 x = 0; x < 3; x++)
 		{
-			platformArray[platformArraySpot] = CreatePlatform(y * 32);
+			platformArray[platformArraySpot] = CreatePlatform(qran_range(0, SCREEN_WIDTH - platformArray[platformArraySpot].width), y * 32);
 			platformArraySpot++;
 		}
 	}
