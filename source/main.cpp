@@ -6,19 +6,20 @@ u32 oam_index = 0;										//!< Used to get/set OAM Size
 
 #pragma region Classes
 
-bool isBouncing = false;	//!< Is the sheep currently in bounce mode
-u32 bounceStrength = 48;		//!< bounceStrength is going to be added to the current Y position of the Sheep
-u32 bounceHeight;			//!< bounceHeight is a combo of the current sheep position and the strength of the jump 
+bool isBouncing = false;		//!< Is the sheep currently in bounce mode
+u32 bounceHeight = 64;			//!< bounceHeight is a combo of the current sheep position and the strength of the jump 
 
 class Sheep
 {
 public:
-	s32 posX = 120, posY = 96;
+	u32 posX = 130, posY = 80;
+
 	u32 tile = 0, paletteBank = 0;
 	OBJ_ATTR* bouncySheepAttr = &obj_buffer[0];
 
 	u32 width = 16, height = 16;
-	u32 fallSpeed = 2;
+
+	u32 speed = 2;
 	u32 horizontalSpeed = 1;
 
 	void Render()
@@ -32,7 +33,7 @@ public:
 class Platform
 {
 public:
-	s32 posX = 0, posY = 144;
+	u32 posX = 0, posY = 144;
 	u32 tile = 4, paletteBank = 1;
 	OBJ_ATTR* platformAttr = &obj_buffer[1];
 
@@ -83,10 +84,8 @@ void ResetOAM()
 
 #pragma region CreatePlatform function
 
-std::array<Platform, 15> platformArray;		//!< The PlatformArray is used to store objects with the type class PLATFORM
+std::array<Platform, 18> platformArray;		//!< The PlatformArray is used to store objects with the type class PLATFORM
 u32 platformArraySpot = 0;					//!< Since I want to use a 2D array, I need to store at what position I am at within the PlatformArray
-
-char posXDebug[300];
 
 // Platform CreatePlatform() is called at the start of the game, its job is to place an X amount platforms across the screen 
 void CreatePlatform(s32 offsetY)
@@ -103,7 +102,6 @@ void CreatePlatform(s32 offsetY)
 
 		for (u32 i = 0; i < platformArraySpot; i++)
 		{
-			snprintf(posXDebug, sizeof(posXDebug), " Platform Spot : %i , Current platform = %i ",platformArraySpot,  platformArray[i]);
 			if (platformArray[i].posY == offsetY && !(((randomPosX + width) < platformArray[i].posX) || ((randomPosX - width) > platformArray[i].posX)))
 			{
 				collision = true;
@@ -111,22 +109,12 @@ void CreatePlatform(s32 offsetY)
 			}
 		}
 
-
-		if (logInitNocash)
-		{
-			logOutputNocash(0, posXDebug);
-		}
-
-
 	} while (collision);
 
 	platformArray[platformArraySpot].posX = randomPosX;
+
 	platformArray[platformArraySpot].posY = offsetY;
 }
-
-
-
-//TODO: Fix the spawning of the platforms | Overlap is still present
 
 #pragma endregion
 
@@ -141,10 +129,6 @@ void MoveBackground()
 	BG0_VER_OFFSET = currentBGOffsetY;
 }
 
-Platform* currentHitPlatform;	//!< Current collision with a platform
-Platform* lastHitPlatform;		//!< Last known collision based on platform type
-bool moveTheWorld = false;
-
 // MovePlatforms() function is used to move all the platforms on screen when the sheep is in a bounce state and the (bool isBouncing = true)
 // It also gives the platforms a new X position everytime they wrap around the screen.
 void MovePlatforms()
@@ -156,16 +140,18 @@ void MovePlatforms()
 		if (platformArray[p].posY > SCREEN_HEIGHT + 48)
 		{
 			u32 randomXPos = qran_range(0, SCREEN_WIDTH - 16);
+
 			platformArray[p].posX = randomXPos;
 			platformArray[p].posY = 0;
 		}
 	}
 }
-
 #pragma endregion
 
-char curPlatBuffer[100];
-char lasPlatBuffer[100];
+char debugText[200];
+s32 restHeightLeft;
+bool alreadyColliding = false;	//!< This boolean stops mutiple collisions from happening when set to true
+s32 distanceTillCenterScreen;
 
 int main()
 {
@@ -184,11 +170,11 @@ int main()
 	}
 
 	// Spawn the amount that the platformArray is able to store (standard is 12 in a 3x4 set up)
-	for (u32 y = 0; y < 5; y++)
+	for (u32 y = 0; y < 6; y++)
 	{
 		for (u32 x = 0; x < 3; x++)
 		{
-			CreatePlatform(y * 32);
+			CreatePlatform(y * 36);
 			platformArraySpot++;
 		}
 	}
@@ -224,59 +210,56 @@ int main()
 				sheep.posX + sheep.width > platformArray[p].posX &&
 				sheep.posY < platformArray[p].posY + platformArray[p].height &&
 				sheep.posY + platformArray[p].height > platformArray[p].posY &&
-				isBouncing == false)
+				!isBouncing && !alreadyColliding)
 			{
-
-				currentHitPlatform = &platformArray[p];
-
-
-				if (currentHitPlatform != lastHitPlatform)
+				if (sheep.posY - bounceHeight < SCREEN_HEIGHT / 2)
 				{
-					/*isBouncing = true;
-					bounceHeight = sheep.posY - bounceStrength;*/
-					lastHitPlatform = &platformArray[p];
-
-					snprintf(curPlatBuffer, sizeof(curPlatBuffer), "currentHitPlatform = %i", currentHitPlatform);
-					snprintf(lasPlatBuffer, sizeof(lasPlatBuffer), "lastHitPlatform = %i", lastHitPlatform);
-
-					if (logInitNocash())
-					{
-						logOutputNocash(0, curPlatBuffer);
-						logOutputNocash(0, lasPlatBuffer);
-					}
+					distanceTillCenterScreen = sheep.posY - SCREEN_HEIGHT / 2;							// Calculates how far away the sheep is from the middle bar of the screen
+					restHeightLeft = bounceHeight - distanceTillCenterScreen;							// Calculates how far the player would've gone without limit, an hypothetical height 
 				}
-				//	else
-				//	{
-				//		moveTheWorld = true;
-				//		lastHitPlatform = currentHitPlatform;
+				else
+				{
+					restHeightLeft = 0;
+				}
 
-				//		isBouncing = true;
-				//		bounceHeight = sheep.posY - bounceStrength;
-				//	}
+				snprintf(debugText, sizeof(debugText), "position Sheep = %i, distanceTillCenterScreen = %i, restHeight = %i", sheep.posY, distanceTillCenterScreen, restHeightLeft);
+
+				if (logInitNocash)
+				{
+					logOutputNocash(0, debugText);
+				}
+
+				alreadyColliding = true;
+				isBouncing = true;
 			}
 		}
 
-		if (sheep.posY > bounceHeight && isBouncing == true)
+		if (isBouncing)
 		{
-			sheep.posY -= sheep.fallSpeed;
-
-			if (moveTheWorld)
+			if (sheep.posY > SCREEN_HEIGHT / 2)
 			{
+				sheep.posY -= sheep.speed;
+			}
+			else if (restHeightLeft > 0 && sheep.posY <= SCREEN_HEIGHT / 2)
+			{
+				sheep.posY = SCREEN_HEIGHT / 2;
+				restHeightLeft -= sheep.speed;
+
 				MoveBackground();
 				MovePlatforms();
+			}
+			else
+			{
+				distanceTillCenterScreen = 0;
+				restHeightLeft = 0;
+				alreadyColliding = false;
+				isBouncing = false;
 			}
 		}
 		else
 		{
-			if (isBouncing == true)
-			{
-				isBouncing = false;
-				moveTheWorld = false;
-				bounceHeight = 0;
-			}
-
-			//	sheep.posY += sheep.fallSpeed;
-			//	if (sheep.posY > SCREEN_HEIGHT) { sheep.posY = 0; }		// TODO: SHEEP DIES
+			sheep.posY += sheep.speed;
+			if (sheep.posY > SCREEN_HEIGHT) { sheep.posY = 0; }
 		}
 
 		if (GetKey(KEY_RIGHT))
@@ -292,13 +275,13 @@ int main()
 
 		if (GetKey(KEY_DOWN))
 		{
-			sheep.posY += sheep.horizontalSpeed;
-			if (sheep.posX > SCREEN_WIDTH) { sheep.posX = 0; }
+			sheep.posY += sheep.speed;
+			if (sheep.posY > SCREEN_WIDTH) { sheep.posY = 0; }
 		}
 		else if (GetKey(KEY_UP))
 		{
-			sheep.posY -= sheep.horizontalSpeed;
-			if (sheep.posX < 0) { sheep.posX = SCREEN_WIDTH; }
+			sheep.posY -= sheep.speed;
+			if (sheep.posY < 0) { sheep.posY = SCREEN_HEIGHT; }
 		}
 
 		OAM_Copy(REG_OAM, obj_buffer, oam_index);
@@ -306,3 +289,8 @@ int main()
 
 	return 0;
 }
+
+
+//TODO: Fix the random replacement of the platforms after they rolled of screen, overlap is present
+//TODO: Make the sheep have smooth movement
+//TODO: CLEAN UP THE CODE IT IS UNREADABLE!!!!!
